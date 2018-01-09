@@ -4,38 +4,48 @@ import numpy as np
 
 if __name__ == "__main__":
     type = "DNN"
-    number = 88
-    path = "D:/SOFTWARE/numerai_data/t_{}".format(number)
+    number = 89
+    desktop = True
+
+    if desktop:
+        path = "C:/SOFTWARE and giggles/NMR_tuning/t_{}".format(number)
+        base = "C:/SOFTWARE and giggles/NMR_tuning/1st_tuning_round"
+    else:
+        path = "D:/SOFTWARE/numerai_data/t_{}".format(number)
+        base = "D:/SOFTWARE/MI Jule tests"
+
+    storage_path = "{}/preds{}".format(base, number)
+
     nmr_loader = NMRDataLoader(path)
     X_train, Y_train, X_val, Y_val, X_tournament, id_tournament = nmr_loader.get_data_small_val(val_era_size=None)
 
+    top_performingCNN = [27, 46, 49, 50, 84, 85, 99, 129, 169, 194, 204, 223, 228, 238, 260, 270]
     dnn_list = [45, 62, 83, 87, 96]
 
     for i in dnn_list:
         model_name = "{}_models_param_{}".format(type, i)
-        model_path = "D:/SOFTWARE/MI Jule tests/{}s/{}".format(type, model_name)
+        model_path = "{}/{}s/{}".format(base, type, model_name)
 
         print("Loading model {}".format(model_name))
         model = keras.models.load_model(model_path)
 
-        #train_eval = model.evaluate(X_train.reshape((-1, 50, 1)), Y_train, batch_size=512)
         print("Evaluating on validation set")
-        #val_eval = model.evaluate(X_val.reshape((-1, 50, 1)), Y_val, batch_size=512)
-        val_eval = model.evaluate(X_val, Y_val, batch_size=512)
-
-        #print("Train loss: {}".format(train_eval[0]))
-        #print("Train accuracy: {}".format(train_eval[1]))
+        if type is "CNN":
+            val_eval = model.evaluate(X_val.reshape((-1, 50, 1)), Y_val, batch_size=512)
+        else:
+            val_eval = model.evaluate(X_val, Y_val, batch_size=512)
 
         print("Validation loss: {}".format(val_eval[0]))
         print("Validation accuracy: {}".format(val_eval[1]))
 
         if val_eval[1] > 0.5175:
             print("Predicting on X_tournament")
-            predictions = model.predict(X_tournament, batch_size=512)
-            #predictions = model.predict(X_tournament.reshape((-1, 50, 1)), batch_size=512)
+            if type is "CNN":
+                predictions = model.predict(X_tournament.reshape((-1, 50, 1)), batch_size=512)
+            else:
+                predictions = model.predict(X_tournament, batch_size=512)
 
         print("Printing results to csv")
-        storage_path = "D:/SOFTWARE/MI Jule tests/preds{}".format(number)
         with cd(storage_path):
             with open("{}_evaluations.csv".format(type), "a") as the_file:
 

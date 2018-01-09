@@ -53,7 +53,7 @@ class PrimaryModel:
         p_size = [params["p_size_input"], params["p_size_b1"], params["p_size_b2"],
                   params["p_size_b3"], params["p_size_b4"], params["p_size_output"]]
 
-        self.dropout = [params["dropout_input_blocks"]]*2 + [params["dropout_end_blocks"]]*2
+        self.dropout = [params["dropout_input_blocks"]]*2 + [params["dropout_middle_blocks"]]*2 + [params["dropout_end_blocks"]]*2
 
         if self.CNN:
             input_ = kl.Input(shape=(self.input_shape, 1))
@@ -122,9 +122,16 @@ class PrimaryModel:
         filters_res = [min_3, min_3, self.CNN_sizes[p_size[3]]]
         model = cmp.Conv1D_res_block(model, filters_res, k_size[3])
 
+        # Dropout
+        model = self._add_dropout(model, DNN=False)
+
         # Extra blocks, gotta get deep
-        model = cmp.Conv1D_identity_block(model, [128, 128], kernel_shape=3)
         model = cmp.Conv1D_res_block(model, [128, 128, 128], kernel_shape=3)
+
+        # Dropout
+        model = self._add_dropout(model, DNN=False)
+
+        model = cmp.Conv1D_res_block(model, [128, 128, self.CNN_sizes[p_size[3]]], kernel_shape=3)
 
         # Dropout
         model = self._add_dropout(model, DNN=False)
