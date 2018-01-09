@@ -1,23 +1,11 @@
 import subprocess
 import os
 import shutil
-
-class cd:
-    """Context manager for changing the current working directory"""
-    def __init__(self, newPath):
-        self.newPath = os.path.expanduser(newPath)
-
-    def __enter__(self):
-        self.savedPath = os.getcwd()
-        os.chdir(self.newPath)
-
-    def __exit__(self, etype, value, traceback):
-        os.chdir(self.savedPath)
-
+from data_loading import cd
 
 if __name__ == "__main__":
-    path = "D:/HORIISON/internal_projects/IlluminatingSingularity"
-    dst_folder = "D:/HORIISON/internal_projects"
+    path = "C:/SOFTWARE and giggles/HORIISON/Other projects/IlluminatingSingularity"
+    dst_folder = "C:/Users/jeppe/Dropbox/MI/uno"
 
     while True:
         # Opening log destination files
@@ -26,7 +14,7 @@ if __name__ == "__main__":
 
         # Running subprocess and logging output and errors
         with cd(path):
-            subprocess.run(['python', 'call_test.py'], stdout=std_out1, stderr=std_err1)
+            subprocess.run(['python', 'main.py'], stderr=std_err1)
 
         # closing log files
         std_out1.close()
