@@ -3,7 +3,7 @@ import keras
 import numpy as np
 
 if __name__ == "__main__":
-    type = "DNN"
+    type = "CNN"
     number = 89
     desktop = True
 
@@ -22,12 +22,18 @@ if __name__ == "__main__":
     top_performingCNN = [27, 46, 49, 50, 84, 85, 99, 129, 169, 194, 204, 223, 228, 238, 260, 270]
     dnn_list = [45, 62, 83, 87, 96]
 
-    for i in dnn_list:
+    for i in top_performingCNN:
         model_name = "{}_models_param_{}".format(type, i)
         model_path = "{}/{}s/{}".format(base, type, model_name)
 
         print("Loading model {}".format(model_name))
         model = keras.models.load_model(model_path)
+
+        print("Evaluating on training set")
+        if type is "CNN":
+            train_eval = model.evaluate(X_train.reshape((-1, 50, 1)), Y_train, batch_size=512)
+        else:
+            train_eval = model.evaluate(X_train, Y_train, batch_size=512)
 
         print("Evaluating on validation set")
         if type is "CNN":
@@ -49,8 +55,11 @@ if __name__ == "__main__":
         with cd(storage_path):
             with open("{}_evaluations.csv".format(type), "a") as the_file:
 
-                the_file.write("{}: \n Validation accuracy: {} \n Validation loss: {} \n"
-                               .format(model_name, val_eval[1], val_eval[0]))
+                the_file.write("{}: \n Train set accuracy: {} \n Train set loss: {} \n"
+                               .format(model_name, train_eval[1], train_eval[0]))
+
+                the_file.write(" Validation accuracy: {} \n Validation loss: {} \n"
+                               .format(val_eval[1], val_eval[0]))
 
             if val_eval[1] > 0.5175:
                 np.save("{}_predictions".format(model_name), predictions)

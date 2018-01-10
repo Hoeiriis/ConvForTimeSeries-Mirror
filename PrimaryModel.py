@@ -20,7 +20,7 @@ class PrimaryModel:
 
         # Setting sizes
         self.CNN_sizes = [32, 64, 128, 256]
-        self.DNN_sizes = [300, 500, 700]
+        self.DNN_sizes = [200, 300, 500, 700]
 
         # For dropout
         self.dropout = None

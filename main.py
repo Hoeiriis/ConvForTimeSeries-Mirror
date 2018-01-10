@@ -5,7 +5,7 @@ import numpy as np
 
 
 def stopper(trials):
-    if trials > 20:
+    if trials > 200:
         return True
 
     return False
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     print("Initializing tuner")
 
     params_CNN = (
-        SingleParam("learning_rate", output_type="double", value_range=(0.0005, 0.002), scaling="log"),
+        SingleParam("learning_rate", output_type="double", value_range=(0.0005, 0.001), scaling="log"),
         SingleParam("p_size_input", output_type="discrete", value_range=[0, 1, 2]),
         SingleParam("p_size_b1", output_type="discrete", value_range=[0, 1, 2]),
         SingleParam("p_size_b2", output_type="discrete", value_range=[0, 1, 2]),
@@ -63,27 +63,33 @@ if __name__ == "__main__":
     rescaler_functions_CNN, param_names_CNN = p_config.make_rescale_dict(params_CNN)
     rescaler_functions_DNN, param_names_DNN = p_config.make_rescale_dict(params_DNN)
 
-    load_param_logs = False
+    load_CNN_param_logs = True
     # Loading and initializing param logs
-    if load_param_logs:
+    if load_CNN_param_logs:
         with cd(save_path):
             CNN_actual = np.load("CNN_models_{}_params_actual.npy".format(name))
             CNN_unscaled = np.load("CNN_models_{}_params_unscaled.npy".format(name))
             CNN_score = np.load("CNN_models_{}_params_scores.npy".format(name))
 
+            CNN_param_log = ParamLog(len(rescaler_functions_CNN), actual=CNN_actual, unscaled=CNN_unscaled,
+                                     score=CNN_score,
+                                     param_descriptions=params_CNN)
+    else:
+        CNN_param_log = None
 
+
+    load_DNN_param_logs = False
+    # Loading and initializing param logs
+    if load_DNN_param_logs:
+        with cd(save_path):
             DNN_actual = np.load("DNN_models_params_actual_{}.npy".format(name))
             DNN_unscaled = np.load("DNN_models_params_unscaled_{}.npy".format(name))
             DNN_score = np.load("DNN_models_params_scores_{}.npy".format(name))
 
-            CNN_param_log = ParamLog(len(rescaler_functions_CNN), actual=CNN_actual, unscaled=CNN_unscaled,
-                                     score=CNN_score,
-                                     param_descriptions=params_CNN)
             DNN_param_log = ParamLog(len(rescaler_functions_DNN), actual=DNN_actual, unscaled=DNN_unscaled,
                                      score=DNN_score,
                                      param_descriptions=params_DNN)
     else:
-        CNN_param_log = None
         DNN_param_log = None
 
     # Initializing tuners
